@@ -5,7 +5,7 @@ REM =============================================================
 REM VocaFlow Windows EXE Builder (fail-safe)
 REM - Keeps window open on failure
 REM - Writes detailed log: build_exe.log
-REM - Auto-detects Python launcher
+REM - Auto-detects Python launcher/path
 REM - Auto-creates venv and builds onefile exe
 REM =============================================================
 
@@ -49,25 +49,58 @@ goto :fail
 
 :find_python
 set "PY_LAUNCH="
+set "PY_CMD="
+
+REM 1) Standard launchers in PATH
 where py >nul 2>nul
 if %errorlevel%==0 (
   set "PY_LAUNCH=py -3"
-) else (
-  where python >nul 2>nul
-  if %errorlevel%==0 set "PY_LAUNCH=python"
+  set "PY_CMD=py -3"
+  call :log "[INFO] Python found via launcher: py -3"
+  exit /b 0
 )
-if "%PY_LAUNCH%"=="" (
-  call :log "[ERROR] Python launcher not found (py/python)."
-  echo [ERROR] Python launcher not found. Install Python 3.10+.
-  exit /b 1
+
+where python >nul 2>nul
+if %errorlevel%==0 (
+  set "PY_LAUNCH=python"
+  set "PY_CMD=python"
+  call :log "[INFO] Python found via PATH: python"
+  exit /b 0
 )
-call :log "[INFO] Python launcher: %PY_LAUNCH%"
-exit /b 0
+
+REM 2) Common install paths (PATH not configured case)
+for %%P in (
+  "%LocalAppData%\Programs\Python\Python312\python.exe"
+  "%LocalAppData%\Programs\Python\Python311\python.exe"
+  "%LocalAppData%\Programs\Python\Python310\python.exe"
+  "%ProgramFiles%\Python312\python.exe"
+  "%ProgramFiles%\Python311\python.exe"
+  "%ProgramFiles%\Python310\python.exe"
+  "%ProgramFiles(x86)%\Python312-32\python.exe"
+  "%ProgramFiles(x86)%\Python311-32\python.exe"
+  "%ProgramFiles(x86)%\Python310-32\python.exe"
+  "C:\Python312\python.exe"
+  "C:\Python311\python.exe"
+  "C:\Python310\python.exe"
+) do (
+  if exist %%~P (
+    set "PY_LAUNCH=%%~P"
+    set "PY_CMD=\"%%~P\""
+    call :log "[INFO] Python found via fallback path: %%~P"
+    exit /b 0
+  )
+)
+
+call :log "[ERROR] Python launcher not found (py/python/fallback paths)."
+echo [ERROR] Python not found.
+echo [HINT] Install Python 3.10+ and check 'Add python.exe to PATH'.
+echo [HINT] Or install to default path: %%LocalAppData%%\Programs\Python\Python3xx
+exit /b 1
 
 :ensure_venv
 if not exist ".venv" (
   call :log "[INFO] Creating .venv ..."
-  %PY_LAUNCH% -m venv .venv >> "%LOGFILE%" 2>&1
+  %PY_CMD% -m venv .venv >> "%LOGFILE%" 2>&1
   if errorlevel 1 (
     call :log "[ERROR] venv creation failed."
     exit /b 1

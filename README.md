@@ -18,6 +18,7 @@ python3 main.py
 ## EXE 만들기 (Windows, 권장)
 `build_exe.bat`는 아래를 자동으로 수행합니다.
 - Python 런처 자동 탐지(`py -3` / `python`)
+- PATH에 python이 없어도 기본 설치 경로(LOCALAPPDATA/Program Files/C:\Python3xx)를 자동 탐색
 - `.venv` 자동 생성
 - 의존성 자동 설치 (`requirements.txt`)
 - PyInstaller onefile 빌드
