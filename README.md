@@ -53,3 +53,11 @@ build_exe.bat
 - `build_exe.bat`는 실패 시 창이 닫히지 않고 `pause` 상태로 멈춥니다.
 - 상세 원인은 루트의 `build_exe.log`를 확인하세요.
 - 프록시/사내망 환경이면 pip 다운로드가 막힐 수 있습니다.
+
+
+## 로그 기반 추가 안내
+- `Python launcher not found`가 한 번 뜨고 다음 실행에서 되는 경우가 있습니다.
+  - Python 설치 직후라면 **cmd/PowerShell을 새로 열고** 다시 `build_exe.bat`를 실행하세요.
+  - 또는 Python 설치 시 `Add python.exe to PATH`를 켜고 재설치/수정하세요.
+- PySide6 다운로드(약 200MB+) 때문에 빌드 준비 단계가 수십 초~수 분 걸릴 수 있습니다.
+- 최종 성공 기준은 로그의 `Build complete`와 `dist\VocaFlow.exe` 생성입니다.
