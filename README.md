@@ -2,7 +2,7 @@
 
 간단하고 가벼운 데스크톱 영단어 암기 프로그램입니다.
 
-## 실행
+## 빠른 실행
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -14,6 +14,24 @@ pip install -r requirements.txt
 ```bash
 python3 main.py
 ```
+
+## EXE 만들기 (Windows)
+Windows에서 아래 순서로 실행하면 `.exe`를 만들 수 있습니다.
+
+```bat
+py -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+build_exe.bat
+```
+
+생성 위치(환경에 따라 둘 중 하나):
+- `dist\VocaFlow.exe`
+- `dist\VocaFlow\VocaFlow.exe`
+
+## 빌드 스크립트
+- `build_exe.bat`: Windows `.exe` 빌드용
+- `build_exe.sh`: 현재 OS용 PyInstaller 빌드(Windows에서 실행하면 `.exe` 생성)
 
 ## 핵심 기능
 - 단어 입력 3가지: 직접 입력 / 여러 줄 입력 / txt 파일 불러오기
