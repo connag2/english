@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import date
+
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -27,7 +29,7 @@ class MainWindow(QMainWindow):
 
         self.storage = Storage()
         self.manager = WordManager(self.storage)
-        self.stats = StatsManager()
+        self.stats = StatsManager(self.storage)
         self.last_wrong_words: list[str] = []
 
         central = QWidget()
@@ -74,11 +76,11 @@ class MainWindow(QMainWindow):
         self._refresh_all()
 
     def _refresh_all(self) -> None:
-        self.manager = WordManager(self.storage)
-        self.book_view.manager = self.manager
+        self.manager.reload()
         self.book_view.refresh()
         total = len(self.manager.all_words())
-        due = len([w for w in self.manager.all_words() if not w.next_review or w.next_review <= __import__("datetime").date.today().isoformat()])
+        today = date.today().isoformat()
+        due = len([w for w in self.manager.all_words() if not w.next_review or w.next_review <= today])
         wrong = ", ".join(self.stats.recent_wrong_words) if self.stats.recent_wrong_words else "없음"
         self.dashboard.setText(
             f"전체 단어: {total} | 오늘 복습 필요: {due} | 오늘 학습: {self.stats.today_studied} | 최근 오답: {wrong}"
@@ -103,7 +105,7 @@ class MainWindow(QMainWindow):
 
     def _on_study_finished(self, wrong_words: list[str], total: int, correct: int) -> None:
         self.last_wrong_words = wrong_words
-        self.storage.save_words(self.manager.all_words())
+        self.storage.save_words(self.manager.all_words(), self.stats.stats)
         self.result_view.set_result(total, correct, total - correct)
         self.stack.setCurrentWidget(self.result_view)
         self._refresh_all()

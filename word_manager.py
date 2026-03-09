@@ -15,6 +15,10 @@ class ParseResult:
 class WordManager:
     def __init__(self, storage: Storage) -> None:
         self.storage = storage
+        self.words: dict[str, WordEntry] = {}
+        self.reload()
+
+    def reload(self) -> None:
         self.words = {w.word: w for w in self.storage.load_words()}
 
     def all_words(self) -> list[WordEntry]:
@@ -69,13 +73,20 @@ class WordManager:
         cleaned_meanings = sorted({m.strip() for m in meanings if m.strip()})
         if not cleaned_word or not cleaned_meanings:
             return "단어/뜻이 비어 있습니다."
+
+        existing = self.words.get(old_word)
+        created_at = existing.created_at if existing else None
+
         if old_word != cleaned_word and old_word in self.words:
             self.words.pop(old_word)
+
         entry = self.words.get(cleaned_word, WordEntry(word=cleaned_word, meanings=[]))
         entry.meanings = cleaned_meanings
+        if created_at:
+            entry.created_at = created_at
         self.words[cleaned_word] = entry
         self._save()
         return None
 
     def _save(self) -> None:
-        self.storage.save_words(sorted(self.words.values(), key=lambda w: w.word))
+        self.storage.save_words(list(self.words.values()))

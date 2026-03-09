@@ -103,7 +103,14 @@ class AddWordsView(QWidget):
     def _save_bulk(self) -> None:
         if not self.last_parsed.merged and not self.last_parsed.errors:
             self._preview_bulk()
+        if not self.last_parsed.merged:
+            QMessageBox.information(self, "안내", "저장할 유효 단어가 없습니다.")
+            return
         self.word_manager.apply_parse_result(self.last_parsed)
+        self.bulk_input.clear()
+        self.preview_list.clear()
+        self.error_list.clear()
+        self.last_parsed = ParseResult()
         self.on_saved()
 
     def _open_file(self) -> None:

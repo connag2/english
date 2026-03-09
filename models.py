@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 
@@ -15,6 +15,7 @@ class WordEntry:
     last_review: str | None = None
     next_review: str | None = None
     favorite: bool = False
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat(timespec="seconds"))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -26,6 +27,7 @@ class WordEntry:
             "last_review": self.last_review,
             "next_review": self.next_review,
             "favorite": self.favorite,
+            "created_at": self.created_at,
         }
 
     @classmethod
@@ -39,6 +41,7 @@ class WordEntry:
             last_review=data.get("last_review"),
             next_review=data.get("next_review"),
             favorite=bool(data.get("favorite", False)),
+            created_at=str(data.get("created_at") or datetime.now().isoformat(timespec="seconds")),
         )
 
 
@@ -55,6 +58,21 @@ class AppStats:
 
     def mark_studied(self) -> None:
         self.today_studied += 1
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "today_studied": self.today_studied,
+            "recent_wrong_words": self.recent_wrong_words,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any] | None) -> "AppStats":
+        if not isinstance(data, dict):
+            return cls()
+        return cls(
+            today_studied=int(data.get("today_studied", 0)),
+            recent_wrong_words=[str(x) for x in data.get("recent_wrong_words", [])][:5],
+        )
 
 
 def today_iso() -> str:

@@ -73,7 +73,7 @@ class WordbookView(QWidget):
         if self.sort_combo.currentText() == "알파벳순":
             words.sort(key=lambda w: w.word)
         elif self.sort_combo.currentText() == "최근추가순":
-            words = list(reversed(words))
+            words.sort(key=lambda w: w.created_at, reverse=True)
         else:
             words.sort(key=lambda w: w.wrong, reverse=True)
 

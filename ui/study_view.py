@@ -27,6 +27,7 @@ class StudyView(QWidget):
         self.index = 0
         self.correct = 0
         self.mode = "meaning"
+        self.answered_current = False
 
         v = QVBoxLayout(self)
         self.progress = QLabel("0/0")
@@ -73,48 +74,67 @@ class StudyView(QWidget):
 
     def _render(self) -> None:
         q = self.questions[self.index]
+        self.answered_current = False
+        self.check_btn.setEnabled(True)
+        self.unknown_btn.setEnabled(True)
         self.progress.setText(f"{self.index + 1}/{len(self.questions)}")
         self.prompt.setText(q.prompt)
         self.answer_input.clear()
         if q.choices:
             self.answer_input.hide()
             for i, b in enumerate(self.choice_buttons):
-                b.setText(q.choices[i] if i < len(q.choices) else "")
-                b.setChecked(False)
-                b.show()
+                if i < len(q.choices):
+                    b.setText(q.choices[i])
+                    b.setChecked(False)
+                    b.show()
+                else:
+                    b.hide()
         else:
             self.answer_input.show()
             for b in self.choice_buttons:
                 b.hide()
 
+    def _finalize_answer(self) -> None:
+        self.answered_current = True
+        self.check_btn.setEnabled(False)
+        self.unknown_btn.setEnabled(False)
+
     def _check(self) -> None:
+        if self.answered_current:
+            return
         q = self.questions[self.index]
         if q.choices:
             selected = ""
             for b in self.choice_buttons:
-                if b.isChecked():
+                if b.isVisible() and b.isChecked():
                     selected = b.text()
             is_correct = selected == q.answer
         else:
             guess = self.answer_input.text().strip()
-            is_correct = guess and guess in q.answer
+            is_correct = bool(guess and guess in q.word.meanings)
 
-        self.engine.mark_result(q.word, bool(is_correct))
-        self.on_progress(q.word.word, bool(is_correct))
+        self.engine.mark_result(q.word, is_correct)
+        self.on_progress(q.word.word, is_correct)
         if is_correct:
             self.correct += 1
         else:
             QMessageBox.information(self, "정답", f"정답: {q.answer}")
+        self._finalize_answer()
 
     def _unknown(self) -> None:
+        if self.answered_current:
+            return
         q = self.questions[self.index]
         self.engine.mark_result(q.word, False)
         self.on_progress(q.word.word, False)
         QMessageBox.information(self, "정답", f"정답: {q.answer}")
+        self._finalize_answer()
 
     def _next(self) -> None:
+        if not self.answered_current:
+            QMessageBox.information(self, "안내", "정답 확인 또는 모르겠어요를 먼저 눌러주세요.")
+            return
         if self.index >= len(self.questions) - 1:
-            wrong = len(self.questions) - self.correct
             self.on_finished(self.engine.wrong_words, len(self.questions), self.correct)
             return
         self.index += 1
