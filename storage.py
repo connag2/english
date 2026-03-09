@@ -9,7 +9,7 @@ from models import AppStats, WordEntry
 DEFAULT_DATA = {
     "words": [],
     "meta": {"version": 1},
-    "stats": {"today_studied": 0, "recent_wrong_words": []},
+    "stats": {"today_studied": 0, "recent_wrong_words": [], "last_study_date": None},
 }
 
 
@@ -30,7 +30,8 @@ class Storage:
             if not isinstance(data, dict) or "words" not in data:
                 raise ValueError("invalid schema")
             data.setdefault("meta", {"version": 1})
-            data.setdefault("stats", {"today_studied": 0, "recent_wrong_words": []})
+            data.setdefault("stats", DEFAULT_DATA["stats"].copy())
+            data["stats"].setdefault("last_study_date", None)
             return data
         except Exception:
             backup = self.path.with_suffix(".broken.json")

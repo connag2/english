@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -75,6 +76,13 @@ class MainWindow(QMainWindow):
 
         self._refresh_all()
 
+    def closeEvent(self, event: QCloseEvent) -> None:
+        self._persist_state()
+        super().closeEvent(event)
+
+    def _persist_state(self) -> None:
+        self.storage.save_words(self.manager.all_words(), self.stats.stats)
+
     def _refresh_all(self) -> None:
         self.manager.reload()
         self.book_view.refresh()
@@ -102,10 +110,11 @@ class MainWindow(QMainWindow):
         self.stats.mark_studied()
         if not is_correct:
             self.stats.mark_wrong(word)
+        self._persist_state()
 
     def _on_study_finished(self, wrong_words: list[str], total: int, correct: int) -> None:
         self.last_wrong_words = wrong_words
-        self.storage.save_words(self.manager.all_words(), self.stats.stats)
+        self._persist_state()
         self.result_view.set_result(total, correct, total - correct)
         self.stack.setCurrentWidget(self.result_view)
         self._refresh_all()
