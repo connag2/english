@@ -75,15 +75,23 @@ class WordManager:
             return "단어/뜻이 비어 있습니다."
 
         existing = self.words.get(old_word)
-        created_at = existing.created_at if existing else None
 
         if old_word != cleaned_word and old_word in self.words:
             self.words.pop(old_word)
 
         entry = self.words.get(cleaned_word, WordEntry(word=cleaned_word, meanings=[]))
         entry.meanings = cleaned_meanings
-        if created_at:
-            entry.created_at = created_at
+
+        if existing and old_word != cleaned_word:
+            entry.level = existing.level
+            entry.correct = existing.correct
+            entry.wrong = existing.wrong
+            entry.last_review = existing.last_review
+            entry.next_review = existing.next_review
+            entry.created_at = existing.created_at
+        elif existing:
+            entry.created_at = existing.created_at
+
         self.words[cleaned_word] = entry
         self._save()
         return None

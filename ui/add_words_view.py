@@ -117,7 +117,19 @@ class AddWordsView(QWidget):
         path, _ = QFileDialog.getOpenFileName(self, "파일 선택", "", "Text Files (*.txt)")
         if not path:
             return
-        text = Path(path).read_text(encoding="utf-8")
+        file_path = Path(path)
+        try:
+            text = file_path.read_text(encoding="utf-8-sig")
+        except UnicodeDecodeError:
+            try:
+                text = file_path.read_text(encoding="cp949")
+            except Exception as e:
+                QMessageBox.warning(self, "파일 오류", f"파일을 읽을 수 없습니다.\n{e}")
+                return
+        except Exception as e:
+            QMessageBox.warning(self, "파일 오류", f"파일을 읽을 수 없습니다.\n{e}")
+            return
+
         self.bulk_input.setPlainText(text)
         self.tabs.setCurrentIndex(1)
         self._preview_bulk()

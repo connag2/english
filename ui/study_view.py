@@ -28,6 +28,7 @@ class StudyView(QWidget):
         self.correct = 0
         self.mode = "meaning"
         self.answered_current = False
+        self.answered_count = 0
 
         v = QVBoxLayout(self)
         self.progress = QLabel("0/0")
@@ -44,12 +45,15 @@ class StudyView(QWidget):
         self.check_btn = QPushButton("정답 확인")
         self.unknown_btn = QPushButton("모르겠어요")
         self.next_btn = QPushButton("다음 문제")
+        self.quit_btn = QPushButton("학습 종료")
         self.check_btn.clicked.connect(self._check)
         self.unknown_btn.clicked.connect(self._unknown)
         self.next_btn.clicked.connect(self._next)
+        self.quit_btn.clicked.connect(self._quit_study)
         row.addWidget(self.check_btn)
         row.addWidget(self.unknown_btn)
         row.addWidget(self.next_btn)
+        row.addWidget(self.quit_btn)
 
         v.addWidget(self.progress)
         v.addWidget(self.prompt)
@@ -66,6 +70,7 @@ class StudyView(QWidget):
         self.questions = [self.engine.build_question(w, mode, pool) for w in pool]
         self.index = 0
         self.correct = 0
+        self.answered_count = 0
         if not self.questions:
             QMessageBox.information(self, "안내", "출제할 단어가 없습니다.")
             self.on_finished([], 0, 0)
@@ -96,6 +101,7 @@ class StudyView(QWidget):
 
     def _finalize_answer(self) -> None:
         self.answered_current = True
+        self.answered_count += 1
         self.check_btn.setEnabled(False)
         self.unknown_btn.setEnabled(False)
 
@@ -108,6 +114,9 @@ class StudyView(QWidget):
             for b in self.choice_buttons:
                 if b.isVisible() and b.isChecked():
                     selected = b.text()
+            if not selected:
+                QMessageBox.warning(self, "경고", "보기를 선택해주세요.")
+                return
             is_correct = selected == q.answer
         else:
             guess = self.answer_input.text().strip()
@@ -135,7 +144,16 @@ class StudyView(QWidget):
             QMessageBox.information(self, "안내", "정답 확인 또는 모르겠어요를 먼저 눌러주세요.")
             return
         if self.index >= len(self.questions) - 1:
-            self.on_finished(self.engine.wrong_words, len(self.questions), self.correct)
+            self.on_finished(self.engine.wrong_words, self.answered_count, self.correct)
             return
         self.index += 1
         self._render()
+
+    def _quit_study(self) -> None:
+        if self.engine is None:
+            self.on_finished([], 0, 0)
+            return
+        confirm = QMessageBox.question(self, "학습 종료", "지금 학습을 종료할까요?")
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+        self.on_finished(self.engine.wrong_words, self.answered_count, self.correct)

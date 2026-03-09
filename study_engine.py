@@ -21,24 +21,26 @@ class StudyEngine:
         self.words = words
         self.wrong_words: list[str] = []
 
-    def select_words(self, review_only: bool = False) -> list[WordEntry]:
+    def select_words(self, review_only: bool = False, limit: int = 30) -> list[WordEntry]:
         if review_only:
             due = [w for w in self.words if due_today(w.next_review)]
             random.shuffle(due)
-            return due
+            return due[:limit]
         items = self.words[:]
         random.shuffle(items)
-        return items
+        return items[:limit]
 
     def build_question(self, target: WordEntry, mode: str, pool: list[WordEntry]) -> Question:
         if mode == "mcq":
             answer = target.meanings[0]
-            distractors = []
+            distractors: list[str] = []
+            seen_meanings = {answer}
             for w in pool:
                 if w.word == target.word:
                     continue
-                if w.meanings:
+                if w.meanings and w.meanings[0] not in seen_meanings:
                     distractors.append(w.meanings[0])
+                    seen_meanings.add(w.meanings[0])
             random.shuffle(distractors)
             choices = [answer] + distractors[:3]
             random.shuffle(choices)
