@@ -1,18 +1,24 @@
-# English Codex Prompt Kit
+# English Vocab App (Desktop)
 
-이 저장소는 Codex에 바로 붙여 넣어 사용할 수 있는 프롬프트 문서를 관리합니다.
+간단하고 가벼운 데스크톱 영단어 암기 프로그램입니다.
 
-## 포함 문서
-- `CODEX_PROMPT_KR.md`: 데스크톱 완성도 중심의 영단어 암기 프로그램 생성용 한국어 최종 프롬프트.
+## 실행
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+./run.sh
+```
 
-## 사용 방법
-1. `CODEX_PROMPT_KR.md`를 복사해서 Codex에 입력
-2. 필요 시 기술 스택/구조/세부 요구사항만 최소 수정
-3. 생성 코드 실행 후 UI/안정성 중심으로 검증
+또는:
+```bash
+python3 main.py
+```
 
-## 프롬프트 핵심 포인트
-- 입력 문법 통일: `word=meaning1|meaning2|meaning3`
-- 입력 방식 3종: 직접 입력 / 여러 줄 입력 / txt 불러오기
-- 저장 전 미리보기 + 오류 줄 분리 + 중복 병합
-- 오답 반복 + 간단 SRS(복습 간격)
-- 데스크톱 기준 UI 가독성/안정성 우선
+## 핵심 기능
+- 단어 입력 3가지: 직접 입력 / 여러 줄 입력 / txt 파일 불러오기
+- 입력 문법: `word=meaning1|meaning2|meaning3`
+- 저장 전 미리보기, 오류 줄 표시, 중복 단어 뜻 병합
+- 단어장 검색/수정/삭제/정렬
+- 학습(영어→뜻), 복습(객관식), 오답 재시험
+- JSON 저장 + 기본 복습 주기(level 기반)
