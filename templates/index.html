@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+  <div class="bg-white rounded-xl p-4 shadow-md"><div class="text-xs text-gray-500">전체 단어</div><div class="text-2xl font-bold">{{ total }}</div></div>
+  <div class="bg-white rounded-xl p-4 shadow-md"><div class="text-xs text-gray-500">오늘 복습 필요</div><div class="text-2xl font-bold">{{ due }}</div></div>
+  <div class="bg-white rounded-xl p-4 shadow-md"><div class="text-xs text-gray-500">오늘 학습</div><div class="text-2xl font-bold">{{ today_studied }}</div></div>
+  <div class="bg-white rounded-xl p-4 shadow-md"><div class="text-xs text-gray-500">최근 오답</div><div class="text-sm">{{ ', '.join(recent_wrong) if recent_wrong else '없음' }}</div></div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4 mb-4">
+  <form method="post" action="{{ url_for('study_start') }}" class="bg-white rounded-xl p-4 shadow-md space-y-2">
+    <h2 class="font-semibold">학습 시작</h2>
+    <select name="mode" class="w-full border rounded-lg p-2">
+      <option value="meaning">영어 → 뜻</option>
+      <option value="mcq">객관식</option>
+    </select>
+    <label class="text-sm"><input type="checkbox" name="review_only" value="1" /> 복습 필요 단어 우선</label>
+    <button class="w-full bg-indigo-500 text-white rounded-lg py-2">시작</button>
+  </form>
+
+  <div class="bg-white rounded-xl p-4 shadow-md space-y-2">
+    <h2 class="font-semibold">바로가기</h2>
+    <a href="{{ url_for('wordbook') }}" class="block bg-gray-900 text-white rounded-lg py-2 text-center">단어장 보기</a>
+  </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4">
+  <form method="post" action="{{ url_for('add_single') }}" class="bg-white rounded-xl p-4 shadow-md space-y-2">
+    <h2 class="font-semibold">직접 추가</h2>
+    <input name="word" class="w-full border rounded-lg p-2" placeholder="apple" />
+    <input name="meanings" class="w-full border rounded-lg p-2" placeholder="사과|과실" />
+    <button class="w-full bg-indigo-500 text-white rounded-lg py-2">추가</button>
+  </form>
+
+  <form method="post" action="{{ url_for('upload_preview') }}" enctype="multipart/form-data" class="bg-white rounded-xl p-4 shadow-md space-y-2">
+    <h2 class="font-semibold">TXT 불러오기</h2>
+    <input type="file" name="txt_file" accept=".txt" class="w-full border rounded-lg p-2" />
+    <button class="w-full bg-indigo-500 text-white rounded-lg py-2">미리보기로 불러오기</button>
+  </form>
+</div>
+
+<form method="post" action="{{ url_for('bulk_preview') }}" class="bg-white rounded-xl p-4 shadow-md space-y-2 mt-4">
+  <h2 class="font-semibold">여러 줄 추가</h2>
+  <textarea name="bulk_text" rows="7" class="w-full border rounded-lg p-2" placeholder="apple=사과\nrun=달리다|운영하다"></textarea>
+  <button class="bg-gray-800 text-white rounded-lg px-4 py-2">미리보기</button>
+</form>
+
+{% if preview_items or preview_errors %}
+<div class="bg-white rounded-xl p-4 shadow-md mt-4">
+  <h3 class="font-semibold mb-2">미리보기 결과</h3>
+  <ul class="list-disc pl-5 text-sm mb-3">
+    {% for item in preview_items %}<li>{{ item }}</li>{% endfor %}
+  </ul>
+  {% if preview_errors %}
+    <div class="text-rose-600 text-sm mb-3">오류: {{ preview_errors|join(' / ') }}</div>
+  {% endif %}
+  <form method="post" action="{{ url_for('bulk_save') }}">
+    <button class="bg-indigo-500 text-white rounded-lg px-4 py-2">저장</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

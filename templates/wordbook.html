@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mb-4 flex flex-col md:flex-row gap-2">
+  <a href="{{ url_for('index') }}" class="bg-gray-800 text-white rounded-lg px-4 py-2 text-center">메인으로</a>
+  <form class="flex gap-2 w-full" method="get">
+    <input name="q" value="{{ q }}" class="flex-1 border rounded-lg p-2" placeholder="검색" />
+    <select name="sort" class="border rounded-lg p-2">
+      <option value="alpha" {{ 'selected' if sort_key=='alpha' }}>알파벳순</option>
+      <option value="recent" {{ 'selected' if sort_key=='recent' }}>최근추가순</option>
+      <option value="wrong" {{ 'selected' if sort_key=='wrong' }}>오답많은순</option>
+    </select>
+    <button class="bg-indigo-500 text-white rounded-lg px-4">적용</button>
+  </form>
+</div>
+
+<div class="space-y-3">
+{% for w in words %}
+  <div class="bg-white rounded-xl shadow-md p-3">
+    <form class="grid md:grid-cols-[1fr_2fr_auto_auto] gap-2" method="post" action="{{ url_for('word_update') }}">
+      <input type="hidden" name="old_word" value="{{ w.word }}" />
+      <input name="new_word" value="{{ w.word }}" class="border rounded-lg p-2" />
+      <input name="meanings" value="{{ ' | '.join(w.meanings) }}" class="border rounded-lg p-2" />
+      <button class="bg-indigo-500 text-white rounded-lg px-3">수정</button>
+    </form>
+    <form method="post" action="{{ url_for('word_delete') }}" class="mt-2">
+      <input type="hidden" name="word" value="{{ w.word }}" />
+      <button class="bg-rose-500 text-white rounded-lg px-3 py-1 text-sm">삭제</button>
+    </form>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}
