@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-white rounded-xl p-4 shadow-md space-y-2">
+  <h2 class="text-xl font-bold">결과</h2>
+  <div>총 문제: {{ result.total }}</div>
+  <div>정답: {{ result.correct }}</div>
+  <div>오답: {{ result.wrong }}</div>
+  <div>정답률: {{ 0 if result.total == 0 else (result.correct * 100 // result.total) }}%</div>
+
+  <div class="flex gap-2 pt-2">
+    <form method="post" action="{{ url_for('retry_wrong') }}"><button class="bg-indigo-500 text-white rounded-lg px-4 py-2">오답만 다시 풀기</button></form>
+    <form method="post" action="{{ url_for('result_close') }}"><button class="bg-gray-800 text-white rounded-lg px-4 py-2">메인으로</button></form>
+  </div>
+</div>
+{% endblock %}

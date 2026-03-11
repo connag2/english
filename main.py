@@ -1,18 +1,4 @@
-from __future__ import annotations
+from app import app
 
-import sys
-
-from PySide6.QtWidgets import QApplication
-
-from ui.main_window import MainWindow
-
-
-def main() -> int:
-    app = QApplication(sys.argv)
-    win = MainWindow()
-    win.show()
-    return app.exec()
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)
